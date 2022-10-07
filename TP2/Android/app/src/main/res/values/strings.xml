@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">SABI</string>
+    <string name="command_bt_hc_05">Comando BT HC-05</string>
+    <string name="send_command_hint">Enviar Comando</string>
 </resources>
