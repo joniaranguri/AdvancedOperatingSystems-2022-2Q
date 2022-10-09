@@ -1,13 +1,10 @@
 package com.example.sabi.contract;
 
 import android.content.Context;
-import android.content.Intent;
 
-import androidx.appcompat.app.AppCompatActivity;
+public interface BluetoothContract {
 
-public interface Contract {
-
-    interface IAppModel {
+    interface IBluetoothModel {
         /**
          * Sends the current command to the Arduino device
          *
@@ -16,7 +13,7 @@ public interface Contract {
         void sendCommand(String command);
     }
 
-    interface IAppView {
+    interface IBluetoothView extends BaseContract.IBaseView {
         /**
          * Gets View context.
          *
@@ -32,18 +29,15 @@ public interface Contract {
         boolean isAttached();
 
         /**
-         * Navigates to the specified activity.
+         * Shows the current command in the UI
          *
-         * @param activityClass the next class activity
+         * @param command the command to be shown
          */
-        default void goToActivity(final Class<AppCompatActivity> activityClass) {
-            final Context currentContext = getViewContext();
-            Intent intent = new Intent(currentContext, activityClass);
-            currentContext.startActivity(intent);
-        }
+        void showCommand(String command);
     }
 
-    interface IAppPresenter {
+    interface IBluetoothPresenter extends BaseContract.IBasePresenter {
+
         /**
          * Checks if view is currently attached
          *
@@ -57,7 +51,6 @@ public interface Contract {
          * @param command the command to send
          */
         void sendCommand(String command);
-
     }
 
 }
