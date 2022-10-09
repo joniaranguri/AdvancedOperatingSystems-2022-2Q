@@ -1,10 +1,5 @@
 package com.example.sabi.presenter;
 
-import android.content.Context;
-import android.content.Intent;
-
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.sabi.contract.MainContract;
 import com.example.sabi.view.BluetoothActivity;
 
@@ -17,15 +12,8 @@ public class MainPresenter implements MainContract.IMainPresenter {
     }
 
     @Override
-    public void goToActivity(Class<? extends AppCompatActivity> activityClass) {
-        final Context currentContext = view.getViewContext();
-        Intent intent = new Intent(currentContext, activityClass);
-        currentContext.startActivity(intent);
-    }
-
-    @Override
     public void onBluetoothButtonClick() {
-        goToActivity(BluetoothActivity.class);
+        view.goToActivity(BluetoothActivity.class);
     }
 
     @Override

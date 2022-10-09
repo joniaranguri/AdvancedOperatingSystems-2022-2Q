@@ -3,6 +3,7 @@ package com.example.sabi.view;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -29,6 +30,13 @@ public class MainActivity extends AppCompatActivity implements MainContract.IMai
                 presenter.onBluetoothButtonClick();
             }
         });
+    }
+
+    @Override
+    public void goToActivity(Class<? extends AppCompatActivity> activityClass) {
+        final Context currentContext = getViewContext();
+        Intent intent = new Intent(currentContext, activityClass);
+        currentContext.startActivity(intent);
     }
 
     @Override
