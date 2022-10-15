@@ -15,7 +15,8 @@ import com.example.sabi.presenter.MainPresenter;
 public class MainActivity extends AppCompatActivity implements MainContract.IMainView {
 
     private Button bluetoothButton;
-    // ToDo: Agregar botón para abrir la actividad que muestra valores de un sensor del device.
+    private Button sensorButton;
+
     private MainContract.IMainPresenter presenter;
 
     @Override
@@ -24,12 +25,10 @@ public class MainActivity extends AppCompatActivity implements MainContract.IMai
         setContentView(R.layout.activity_main);
         presenter = new MainPresenter(this);
         bluetoothButton = findViewById(R.id.main_activity_bluetooth_button);
-        bluetoothButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                presenter.onBluetoothButtonClick();
-            }
-        });
+        sensorButton = findViewById(R.id.main_activity_sensor_button);
+
+        bluetoothButton.setOnClickListener(view -> presenter.onBluetoothButtonClick());
+        sensorButton.setOnClickListener(view -> presenter.onSensorActivityClick());
     }
 
     @Override

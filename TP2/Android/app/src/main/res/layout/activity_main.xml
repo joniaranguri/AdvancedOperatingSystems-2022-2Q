@@ -18,4 +18,18 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
+    <Button
+        android:id="@+id/main_activity_sensor_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/blue"
+        android:text="@string/open_sensors"
+        android:textAllCaps="false"
+        android:layout_marginTop="15dp"
+        app:layout_constraintEnd_toEndOf="@+id/main_activity_bluetooth_button"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/main_activity_bluetooth_button"
+        app:layout_constraintTop_toBottomOf="@+id/main_activity_bluetooth_button" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

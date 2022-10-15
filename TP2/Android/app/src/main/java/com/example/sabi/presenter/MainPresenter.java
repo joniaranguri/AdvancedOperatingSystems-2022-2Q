@@ -2,6 +2,7 @@ package com.example.sabi.presenter;
 
 import com.example.sabi.contract.MainContract;
 import com.example.sabi.view.BluetoothActivity;
+import com.example.sabi.view.SensorActivity;
 
 public class MainPresenter implements MainContract.IMainPresenter {
 
@@ -18,6 +19,6 @@ public class MainPresenter implements MainContract.IMainPresenter {
 
     @Override
     public void onSensorActivityClick() {
-        // ToDo: Abrir activity para ver valores de un sensor del teléfono.
+        view.goToActivity(SensorActivity.class);
     }
 }
