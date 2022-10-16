@@ -8,11 +8,11 @@ public class MainOptions {
 
 
     public static final MainOption[] list = {
-            new MainOption("Comandos bluetooth",
-                    "Envia comandos bluetooth al dispositivo Arduino de SABI",
+            new MainOption(R.string.option_bluetooth_title,
+                    R.string.option_bluetooth_subtitle,
                     R.drawable.ic_bluetooth_round),
 
-            new MainOption("Visualizar sensores",
-                    "Interactua con los sensores del celular para realizar alguna accion en el Arduino SABI",
+            new MainOption(R.string.option_sensors_title,
+                    R.string.option_sensors_subtitle,
                     R.drawable.ic_arduino_round)};
 }

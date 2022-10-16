@@ -1,13 +1,13 @@
 package com.example.sabi.view.static_data;
 
 public class MainOption {
-    public String title;
-    public String subtitle;
+    public int titleResId;
+    public int subtitleResId;
     public int imageId;
 
-    public MainOption(String title, String subtitle, int imageId) {
-        this.title = title;
-        this.subtitle = subtitle;
+    public MainOption(int titleResId, int subtitleResId, int imageId) {
+        this.titleResId = titleResId;
+        this.subtitleResId = subtitleResId;
         this.imageId = imageId;
     }
 }

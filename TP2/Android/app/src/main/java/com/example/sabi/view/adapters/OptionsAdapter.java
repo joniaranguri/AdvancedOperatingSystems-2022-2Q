@@ -29,9 +29,9 @@ public class OptionsAdapter extends ArrayAdapter<String> {
         ImageView imageView = rowView.findViewById(R.id.icon);
         TextView subtitleText = rowView.findViewById(R.id.subtitle);
 
-        titleText.setText(MainOptions.list[position].title);
+        titleText.setText(MainOptions.list[position].titleResId);
         imageView.setImageResource(MainOptions.list[position].imageId);
-        subtitleText.setText(MainOptions.list[position].subtitle);
+        subtitleText.setText(MainOptions.list[position].subtitleResId);
 
         return rowView;
 
