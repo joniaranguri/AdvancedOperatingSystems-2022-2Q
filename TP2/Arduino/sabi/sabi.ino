@@ -1,5 +1,6 @@
 // Descomentar la siguiente línea para trabajar en el IDE de Arduino
 // #include <DS3231.h>
+#include <SoftwareSerial.h>
 
 // ------------------------------------------------
 // Etiquetas
@@ -10,7 +11,7 @@
 // Constantes
 // ------------------------------------------------
 #define MAX_STATES 6
-#define MAX_EVENTS 6
+#define MAX_EVENTS 8
 #define MAX_VALUE_POTENTIOMETER_AUTO 341
 #define MAX_VALUE_POTENTIOMETER_OFF 648
 #define CONTINUE_VALUE -1
@@ -18,8 +19,8 @@
 #define COLOR_MIN_AMOUNT 0
 #define COLOR_GREEN_AMOUNT_FOR_ORANGE 69
 // Para probar con Serial.read, cambiar el rango horario entre dos valores < 10
-#define DATE_TIME_HOUR_MIN 1
-#define DATE_TIME_HOUR_MAX 4
+#define DATE_TIME_HOUR_MIN 9
+#define DATE_TIME_HOUR_MAX 21
 
 // ------------------------------------------------
 // TEMPORIZADORES
@@ -33,6 +34,8 @@
 #define PIN_D_HALF_CABLE 4
 #define PIN_D_THREE_QUARTER_CABLE 7
 #define PIN_D_FULL_CABLE 8
+#define PIN_D_RX 5
+#define PIN_D_TX 6
 #define PIN_A_POTENTIOMETER A0
 //////////// #define PIN_SCL_CLOCK
 //////////// #define PIN_SDA_CLOCK
@@ -51,18 +54,18 @@
 enum states_e {
     STATE_INITIAL,
     STATE_OFF,
-    STATE_AUTO,
+    STATE_AUTO_WITHIN_RANGE,
+    STATE_AUTO_OUT_OF_RANGE,
     STATE_ON,
-    STATE_AUTON,
     STATE_ERROR
 };
 
 String states_s [] = {
     "STATE_INITIAL",
     "STATE_OFF", 
-    "STATE_AUTO", 
+    "STATE_AUTO_WITHIN_RANGE",
+    "STATE_AUTO_OUT_OF_RANGE", 
     "STATE_ON",
-    "STATE_AUTON",
     "STATE_ERROR"
 };
 
@@ -72,20 +75,24 @@ String states_s [] = {
 enum events_e {
     EVENT_CONTINUE,
     EVENT_OFF_SELECTED,
-    EVENT_AUTO_SELECTED,
+    EVENT_AUTO_SELECTED_WITHIN_RANGE,
+    EVENT_AUTO_SELECTED_OUT_OF_RANGE,
     EVENT_ON_SELECTED,
     EVENT_WATER_LEVEL_CHANGED,
     EVENT_TIME_LIMIT_REACHED,
+    EVENT_BT_COMMAND_RECEIVED,
     EVENT_UNKNOWN
 };
 
 String events_s [] = {
     "EVENT_CONTINUE",
     "EVENT_OFF_SELECTED",
-    "EVENT_AUTO_SELECTED",
+    "EVENT_AUTO_SELECTED_WITHIN_RANGE",
+    "EVENT_AUTO_SELECTED_OUT_OF_RANGE",
     "EVENT_ON_SELECTED",
     "EVENT_WATER_LEVEL_CHANGED",
     "EVENT_TIME_LIMIT_REACHED",
+    "EVENT_BT_COMMAND_RECEIVED",
     "EVENT_UNKNOWN"
 };
 
@@ -169,6 +176,10 @@ boolean current_time_range_check;
 unsigned long previous_time;
 unsigned long current_time;
 
+String bt_command;
+
+SoftwareSerial BTSerial(PIN_D_RX, PIN_D_TX);
+
 // ------------------------------------------------
 // Logs
 // ------------------------------------------------
@@ -208,7 +219,12 @@ bool potentiometer_changed() {
         potentiometer.previous_state = potentiometer.current_state;
         switch (potentiometer.current_state) {
             case POTENTIOMETER_STATE_AUTO:
-                new_event = EVENT_AUTO_SELECTED;
+                update_current_time_range_check();
+                if(current_time_range_check) {
+                    new_event = EVENT_AUTO_SELECTED_WITHIN_RANGE;
+                } else {
+                    new_event = EVENT_AUTO_SELECTED_OUT_OF_RANGE;
+                }
                 break;
             case POTENTIOMETER_STATE_OFF:
                 new_event = EVENT_OFF_SELECTED;
@@ -236,8 +252,27 @@ void get_current_potentiometer_state() {
     }
 }
 
-// Reviso si cambió la hora del reloj
+// Reviso si hay que cambiar el estado del relay por un cambio de rango horario según el nivel de agua
 bool time_limit_reached() {
+    if (changed_time_range()) {
+        new_event = EVENT_TIME_LIMIT_REACHED;
+        return true;
+    }
+    return false;
+}
+
+// Indica si se pasó de un rango horario a otro
+bool changed_time_range() {
+    update_current_time_range_check();
+    if (previous_time_range_check != current_time_range_check) {
+        previous_time_range_check = current_time_range_check;
+        return true;
+    }
+    return false;
+}
+
+// Según el horario, actualiza el booleano que indica si se está dentro el rango horario donde se puede encender la bomba.
+void update_current_time_range_check() {
     if(Serial.available()){
         /*current_date = read_rtc();*/current_hour = Serial.read() - '0';
     }
@@ -247,12 +282,6 @@ bool time_limit_reached() {
     else {
         current_time_range_check = false;
     }
-    if (previous_time_range_check != current_time_range_check) {
-        previous_time_range_check = current_time_range_check;
-        new_event = EVENT_TIME_LIMIT_REACHED;
-        return true;
-    }
-    return false;
 }
 
 // Reviso si cambió el nivel de agua en el tanque
@@ -291,6 +320,17 @@ void get_current_tank_state() {
     }
 }
 
+// Reviso si llegó un comando por Bluetooth y le saco los caracteres de separación
+bool bt_command_received() {
+  if (BTSerial.available()) {
+      bt_command = BTSerial.readString();
+      bt_command.trim(); 
+      new_event = EVENT_BT_COMMAND_RECEIVED;
+      return true;
+  }
+  return false;
+}
+
 // ------------------------------------------------
 // Manejo de eventos
 // ------------------------------------------------
@@ -304,14 +344,16 @@ void initialize() {
     current_time_range_check = false;
 }
 
-// Modo "Auto" seleccionado en el potenciómetro
-// En caso de que estemos dentro del rango de horario, fuerzo un flanco ascendente para
-// crear un EVENT_TIME_LIMIT_REACHED y pasar a STATE_AUTON
-void handle_event_auto_selected() {
-    current_state = STATE_AUTO;
-    if (current_time_range_check) {
-        previous_time_range_check = !previous_time_range_check;
-    }
+// Modo "Auto" seleccionado en el potenciómetro dentro del rango horario aceptable para el funcionamiento de la bomba
+void handle_event_auto_selected_within_range() {
+    current_state = STATE_AUTO_WITHIN_RANGE;
+    update_relay_based_on_tank_state();
+}
+
+// Modo "Auto" seleccionado en el potenciómetro fuera del rango horario aceptable para el funcionamiento de la bomba
+void handle_event_auto_selected_out_of_range() {
+    current_state = STATE_AUTO_OUT_OF_RANGE;
+    update_relay(false);
 }
 
 // Modo "Off" seleccionado en el potenciómetro
@@ -328,33 +370,52 @@ void handle_event_on_selected() {
     current_state = STATE_ON;
 }
 
-// Cambio de rango horario para estado Auto
-void handle_time_reached_auto() {
-    current_state = STATE_AUTON;
-    update_relay_if_conditions_met();
-}
-
-// Cambio de rango horario para estado Auton, siempre volvera a Auto
-void handle_time_reached_auton() {
-    current_state = STATE_AUTO;
+// Cambio de rango horario estando en el rango aceptable -> pasa a rango horario no aceptable
+void handle_time_limit_reached_within_range() {
+    current_state = STATE_AUTO_OUT_OF_RANGE;
     update_relay(false);
 }
 
-// Cambio de nivel de agua detectado en el tanque en el estado STATE_AUTO
-void handle_water_level_changed_auto() {
+// Cambio de rango horario estando en el rango no aceptable -> pasa a rango horario aceptable
+void handle_time_limit_reached_out_of_range() {
+    current_state = STATE_AUTO_WITHIN_RANGE;
+    update_relay_based_on_tank_state();
+}
+
+// Cambio de nivel de agua detectado en el tanque en el estado STATE_AUTO_WITHIN_RANGE
+void handle_water_level_changed_auto_within_range() {
     update_rgb_led();
+    send_water_level_through_bluetooth();
+    update_relay_based_on_tank_state();
+}
+
+// Cambio de nivel de agua detectado en el tanque en el estado STATE_AUTO_OUT_OF_RANGE
+void handle_water_level_changed_auto_out_of_range() {
+    update_rgb_led();
+    send_water_level_through_bluetooth();
 }
 
 // Cambio de nivel de agua detectado en el tanque en el estado STATE_OFF
 void handle_water_level_changed_off() {
     update_rgb_led();
+    send_water_level_through_bluetooth();
 }
 
-// Cambio de nivel de agua detectado en el tanque en el estado STATE_ON y STATE_AUTON
+// Cambio de nivel de agua detectado en el tanque en el estado STATE_ON
 void handle_water_level_changed_on() {
     update_rgb_led();
+    send_water_level_through_bluetooth();
     if(current_tank_state == TANK_FULL) {
         update_relay(false);
+    }
+}
+
+// Actúo sobre el embebido en base al comando recibido por Bluetooth
+void handle_bt_command_received() {
+    if (bt_command == "1") {
+        digitalWrite(LED_BUILTIN, HIGH);
+    } else {
+        digitalWrite(LED_BUILTIN, LOW);
     }
 }
 
@@ -383,16 +444,16 @@ void update_relay(bool turn_on) {
     }
 }
 
-// Enciende o apaga la bomba de acuerdo a si se cumplen las condiciones necesarias de nivel de agua
-void update_relay_if_conditions_met() {
-        switch(current_tank_state) {
-            case TANK_EMPTY:
-                update_relay(true);
-                break;
-            case TANK_FULL:
-                update_relay(false);
-                break;
-        }
+// Enciende o apaga la bomba de acuerdo al nivel de agua
+void update_relay_based_on_tank_state() {
+    switch(current_tank_state) {
+        case TANK_EMPTY:
+            update_relay(true);
+            break;
+        case TANK_FULL:
+            update_relay(false);
+            break;
+    }
 }
 
 // Cambia color del led RGB
@@ -431,6 +492,10 @@ void update_rgb_led() {
     }
 }
 
+// Envía el nivel de agua a través del Bluetooth
+void send_water_level_through_bluetooth() {
+    BTSerial.println(current_tank_state);
+}
 
 // ------------------------------------------------
 // Captura de eventos
@@ -442,7 +507,7 @@ void get_new_event()
     if (time_diff >= TMP_EVENTS_MILLIS) {
         previous_time = current_time;
         
-        if (potentiometer_changed() || time_limit_reached() || water_level_changed()) {
+        if (potentiometer_changed() || time_limit_reached() || water_level_changed() || bt_command_received()) {
             return;
         }
     }
@@ -455,6 +520,9 @@ void get_new_event()
 void start()
 {
     Serial.begin(9600);
+
+    BTSerial.begin(9600);
+    pinMode(LED_BUILTIN, OUTPUT);
 
     // Asigno los pines a los sensores correspondientes
     potentiometer.pin = PIN_A_POTENTIOMETER;
@@ -500,14 +568,14 @@ typedef void (*transition)();
 
 transition state_table[MAX_STATES][MAX_EVENTS] =
 {
-      {initialize       , none                      , none                          , none                      , none                              , none                      } , // STATE_INITIAL
-      {none             , handle_event_off_selected , handle_event_auto_selected    , handle_event_on_selected  , handle_water_level_changed_off    , none                      } , // STATE_OFF
-      {none             , handle_event_off_selected , handle_event_auto_selected    , handle_event_on_selected  , handle_water_level_changed_auto   , handle_time_reached_auto } , // STATE_AUTO
-      {none             , handle_event_off_selected , handle_event_auto_selected    , handle_event_on_selected  , handle_water_level_changed_on     , none                      } , // STATE_ON
-      {none             , handle_event_off_selected , none                          , handle_event_on_selected  , handle_water_level_changed_on     , handle_time_reached_auton } , // STATE_AUTON
-      {error            , error                     , error                         , error                     , error                             , error                     } , // STATE_ERROR
+      {initialize       , none                      , none                                      , none                                      , none                      , none                                          , none                                    , none                        } , // STATE_INITIAL
+      {none             , handle_event_off_selected , handle_event_auto_selected_within_range   , handle_event_auto_selected_out_of_range   , handle_event_on_selected  , handle_water_level_changed_off                , none                                    , handle_bt_command_received  } , // STATE_OFF
+      {none             , handle_event_off_selected , handle_event_auto_selected_within_range   , handle_event_auto_selected_out_of_range   , handle_event_on_selected  , handle_water_level_changed_auto_within_range  , handle_time_limit_reached_within_range  , handle_bt_command_received  } , // STATE_AUTO_WITHIN_RANGE
+      {none             , handle_event_off_selected , handle_event_auto_selected_within_range   , handle_event_auto_selected_out_of_range   , handle_event_on_selected  , handle_water_level_changed_auto_out_of_range  , handle_time_limit_reached_out_of_range  , handle_bt_command_received  } , // STATE_AUTO_OUT_OF_RANGE
+      {none             , handle_event_off_selected , handle_event_auto_selected_within_range   , handle_event_auto_selected_out_of_range   , handle_event_on_selected  , handle_water_level_changed_on                 , none                                    , handle_bt_command_received  } , // STATE_ON
+      {error            , error                     , error                                     , error                                     , error                     , error                                         , error                                   , error                       } , // STATE_ERROR
       
-     //EVENT_CONTINUE   , EVENT_OFF_SELECTED        , EVENT_AUTO_SELECTED           , EVENT_ON_SELECTED         , EVENT_WATER_LEVEL_CHANGED         , EVENT_TIME_LIMIT_REACHED
+     //EVENT_CONTINUE   , EVENT_OFF_SELECTED        , EVENT_AUTO_SELECTED_WITHIN_RANGE          , EVENT_AUTO_SELECTED_OUT_OF_RANGE          , EVENT_ON_SELECTED         , EVENT_WATER_LEVEL_CHANGED                     , EVENT_TIME_LIMIT_REACHED                , EVENT_BT_COMMAND_RECEIVED
 };
 
 // ------------------------------------------------
@@ -523,6 +591,7 @@ void fsm()
     {
         log(states_s[current_state], events_s[new_event]);
     }
+    
     state_table[current_state][new_event]();
   }
   else
