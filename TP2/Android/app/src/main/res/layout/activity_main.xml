@@ -4,18 +4,44 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/sabi_background"
+    android:padding="20dp"
     tools:context=".view.MainActivity">
 
-    <Button
-        android:id="@+id/main_activity_bluetooth_button"
+    <TextView
+        android:id="@+id/main_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="SABI"
+        android:textAlignment="textStart"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/main_subtitle"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/main_subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/blue"
-        android:text="@string/open_bluetooth"
-        android:textAllCaps="false"
-        app:layout_constraintTop_toTopOf="parent"
+        android:text="Elije que accion queres realizar con tu Sistema Automatico de bomba inteligente"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@id/list_options"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <ListView
+        android:id="@+id/list_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@null"
+        android:dividerHeight="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_subtitle"></ListView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
