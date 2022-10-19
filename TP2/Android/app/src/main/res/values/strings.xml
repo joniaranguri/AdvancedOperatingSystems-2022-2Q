@@ -2,7 +2,13 @@
     <!-- APP -->
     <string name="app_name">SABI</string>
     <!-- MAIN ACTIVITY -->
-    <string name="open_bluetooth">Abrir funcionalidad Bluetooth</string>
+
+    <string name="main_subtitle">Elije que acción quieres realizar con tu Sistema Automático de Bomba Inteligente</string>
+    <string name="option_bluetooth_title">Comandos bluetooth</string>
+    <string name="option_bluetooth_subtitle">Envia comandos bluetooth al dispositivo Arduino de SABI</string>
+    <string name="option_sensors_title">Visualizar sensores</string>
+    <string name="option_sensors_subtitle">Interactua con los sensores del celular para realizar alguna acción en el Arduino SABI</string>
+
     <!-- BLUETOOTH ACTIVITY -->
     <string name="command_bt_hc_05">Comando BT HC-05</string>
     <string name="send_command_hint">Enviar Comando</string>

@@ -15,6 +15,6 @@ public class SensorPresenter implements SensorContract.ISensorPresenter {
 
     @Override
     public boolean isViewAttached() {
-        return false;
+        return view.isAttached();
     }
 }

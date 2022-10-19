@@ -1,22 +1,20 @@
 package com.example.sabi.view;
 
+import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
+import android.widget.ListView;
 
 import com.example.sabi.R;
 import com.example.sabi.contract.MainContract;
 import com.example.sabi.presenter.MainPresenter;
+import com.example.sabi.view.adapters.OptionsAdapter;
+import com.example.sabi.view.static_data.MainOptions;
 
 public class MainActivity extends AppCompatActivity implements MainContract.IMainView {
-
-    private Button bluetoothButton;
-    private Button sensorButton;
-
     private MainContract.IMainPresenter presenter;
 
     @Override
@@ -24,11 +22,24 @@ public class MainActivity extends AppCompatActivity implements MainContract.IMai
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         presenter = new MainPresenter(this);
-        bluetoothButton = findViewById(R.id.main_activity_bluetooth_button);
-        sensorButton = findViewById(R.id.main_activity_sensor_button);
 
-        bluetoothButton.setOnClickListener(view -> presenter.onBluetoothButtonClick());
-        sensorButton.setOnClickListener(view -> presenter.onSensorActivityClick());
+        OptionsAdapter adapter = new OptionsAdapter(this);
+        final ListView list = findViewById(R.id.list_options);
+        list.setAdapter(adapter);
+        list.setOnItemClickListener((parent, view, position, id) -> goToOption(position));
+    }
+
+    private void goToOption(int position) {
+        switch (position) {
+            case MainOptions.BLUETOOTH_OPTION_INDEX:
+                presenter.onBluetoothButtonClick();
+                break;
+            case MainOptions.SENSORS_OPTION_INDEX:
+                presenter.onSensorActivityClick();
+                break;
+            default:
+                // Do nothing
+        }
     }
 
     @Override
