@@ -1,6 +1,5 @@
 package com.example.sabi.view;
 
-import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
