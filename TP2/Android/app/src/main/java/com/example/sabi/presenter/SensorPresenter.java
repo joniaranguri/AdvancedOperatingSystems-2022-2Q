@@ -24,14 +24,12 @@ public class SensorPresenter implements SensorContract.ISensorPresenter {
 
     @Override
     public void endSensors() {
-        if (isViewAttached())
-            sensorManager.unregisterListener(model, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
+        sensorManager.unregisterListener(model, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
     }
 
     @Override
     public void initSensors() {
-        if (isViewAttached())
-            sensorManager.registerListener(model, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(model, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
