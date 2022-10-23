@@ -14,7 +14,6 @@ import com.example.sabi.view.adapters.OptionsAdapter;
 import com.example.sabi.view.static_data.MainOptions;
 
 public class MainActivity extends AppCompatActivity implements MainContract.IMainView {
-
     private MainContract.IMainPresenter presenter;
 
     @Override
@@ -35,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.IMai
                 presenter.onBluetoothButtonClick();
                 break;
             case MainOptions.SENSORS_OPTION_INDEX:
-                // TODO: Go to sensors activity
+                presenter.onSensorActivityClick();
                 break;
             default:
                 // Do nothing
