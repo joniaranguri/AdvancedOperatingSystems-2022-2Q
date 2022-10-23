@@ -12,4 +12,8 @@
     <!-- BLUETOOTH ACTIVITY -->
     <string name="command_bt_hc_05">Comando BT HC-05</string>
     <string name="send_command_hint">Enviar Comando</string>
+
+    <!-- SENSORS ACTIVITY -->
+    <string name="sensor_accelerometer_title">Acelerómetro</string>
+
 </resources>
