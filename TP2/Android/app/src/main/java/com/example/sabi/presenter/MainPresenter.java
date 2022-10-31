@@ -2,6 +2,7 @@ package com.example.sabi.presenter;
 
 import com.example.sabi.contract.MainContract;
 import com.example.sabi.view.BluetoothActivity;
+import com.example.sabi.view.PairActivity;
 import com.example.sabi.view.SensorActivity;
 
 public class MainPresenter implements MainContract.IMainPresenter {
@@ -14,7 +15,7 @@ public class MainPresenter implements MainContract.IMainPresenter {
 
     @Override
     public void onBluetoothButtonClick() {
-        view.goToActivity(BluetoothActivity.class);
+        view.goToActivity(PairActivity.class);
     }
 
     @Override
