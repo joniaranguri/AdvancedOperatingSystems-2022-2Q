@@ -1,12 +1,12 @@
 package com.example.sabi.presenter;
 
-import android.Manifest;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Build;
-
-import androidx.core.content.ContextCompat;
 
 import com.example.sabi.contract.PairContract;
 import com.example.sabi.model.PairModel;
@@ -18,22 +18,20 @@ public class PairPresenter implements PairContract.IPairPresenter {
 
     public static final int MULTIPLE_PERMISSIONS = 10;
 
-    private final String[] permissions= new String[]{
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.READ_EXTERNAL_STORAGE};
-
     private final PairContract.IPairView view;
     private final PairContract.IPairModel model;
+
+    private final ArrayList<BluetoothDevice> deviceList = new ArrayList<>();
 
     public PairPresenter(PairContract.IPairView view) {
         this.view = view;
         this.model = new PairModel();
-        if (model.isBluetoothOn()) {
-            view.updateViewsForBluetoothOn();
+        if (model.getBluetoothAdapter() != null) {
+            if (model.isBluetoothOn()) {
+                view.updateViewsForBluetoothOn();
+            }
+        } else {
+            view.updateViewsForBluetoothUnsupported();
         }
     }
 
@@ -46,7 +44,7 @@ public class PairPresenter implements PairContract.IPairPresenter {
 
     @Override
     public void onSearchButtonClick() {
-
+        model.startDiscovery();
     }
 
     @Override
@@ -59,24 +57,69 @@ public class PairPresenter implements PairContract.IPairPresenter {
     }
 
     @Override
-    public boolean checkpermissions() {
-        int result;
-        List<String> listPermissionsNeeded = new ArrayList<>();
+    public void onProgressDialogCancelled() {
+        view.dismissProgressDialog();
+        model.cancelDiscovery();
+    }
 
+    @Override
+    public boolean checkpermissions() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return true;
         }
 
-        for (String p:permissions) {
-            result = ContextCompat.checkSelfPermission(view.getViewContext(),p);
-            if (result != PackageManager.PERMISSION_GRANTED) {
-                listPermissionsNeeded.add(p);
-            }
-        }
+        List <String> listPermissionsNeeded = model.getPermissionsNeeded(view.getViewContext());
+
         if (!listPermissionsNeeded.isEmpty()) {
             view.requestPermissions(listPermissionsNeeded);
             return false;
         }
         return true;
     }
+
+    @Override
+    public void tryRegisterReceiver() {
+        if (checkpermissions()) {
+            view.registerReceiverForPair(receiver, model.getIntentFilter());
+        }
+    }
+
+    @Override
+    public void onViewPaused() {
+        if (model.getBluetoothAdapter() != null) {
+            model.cancelDiscovery();
+        }
+    }
+
+    @Override
+    public BroadcastReceiver getReceiver() {
+        return receiver;
+    }
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        @SuppressLint("MissingPermission")
+        public void onReceive(Context context, Intent intent) {
+
+            String action = intent.getAction();
+
+            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+
+                onBluetoothStateToggle(state == BluetoothAdapter.STATE_ON);
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                view.showProgressDialog();
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                view.dismissProgressDialog();
+                view.startDeviceListActivity(deviceList);
+                deviceList.clear();
+            }
+            else if (BluetoothDevice.ACTION_FOUND.equals(action))
+            {
+                BluetoothDevice device = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+                deviceList.add(device);
+                view.showDeviceFoundToast(device.getName());
+            }
+        }
+    };
 }

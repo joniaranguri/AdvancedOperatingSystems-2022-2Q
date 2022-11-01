@@ -6,8 +6,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import android.app.ProgressDialog;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
@@ -19,6 +24,7 @@ import com.example.sabi.R;
 import com.example.sabi.contract.PairContract;
 import com.example.sabi.presenter.PairPresenter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PairActivity extends AppCompatActivity implements PairContract.IPairView{
@@ -29,6 +35,7 @@ public class PairActivity extends AppCompatActivity implements PairContract.IPai
     private TextView btStateTv;
     private Button activateBtBtn;
     private Button searchBtn;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +49,22 @@ public class PairActivity extends AppCompatActivity implements PairContract.IPai
         activateBtBtn.setOnClickListener(view -> presenter.onActivateBtButtonClick());
         searchBtn.setOnClickListener(view -> presenter.onSearchButtonClick());
 
-        presenter.checkpermissions();
+        progressDialog = new ProgressDialog(this);
+
+        progressDialog.setMessage(getString(R.string.searching_devices));
+        progressDialog.setCancelable(false);
+
+        progressDialog.setButton(
+                DialogInterface.BUTTON_NEGATIVE,
+                getString(R.string.cancel),
+                (dialogInterface, i) -> presenter.onProgressDialogCancelled()
+        );
+    }
+
+    @Override
+    protected void onResume() {
+        presenter.tryRegisterReceiver();
+        super.onResume();
     }
 
     @Override
@@ -60,6 +82,14 @@ public class PairActivity extends AppCompatActivity implements PairContract.IPai
     }
 
     @Override
+    public void updateViewsForBluetoothUnsupported() {
+        btStateTv.setVisibility(View.VISIBLE);
+        btStateTv.setText(R.string.bluetooth_unsupported);
+        activateBtBtn.setEnabled(false);
+        searchBtn.setEnabled(false);
+    }
+
+    @Override
     public void startForResult(Intent intent) {
         startActivityForResult(intent, permissionsRequestCode);
     }
@@ -71,6 +101,35 @@ public class PairActivity extends AppCompatActivity implements PairContract.IPai
                 listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]),
                 MULTIPLE_PERMISSIONS
         );
+    }
+
+    @Override
+    public void registerReceiverForPair(BroadcastReceiver receiver, IntentFilter filter) {
+        registerReceiver(receiver, filter);
+    }
+
+    @Override
+    public void showProgressDialog() {
+        progressDialog.show();
+    }
+
+    @Override
+    public void dismissProgressDialog() {
+        progressDialog.dismiss();
+    }
+
+    @Override
+    public void showDeviceFoundToast(String deviceName) {
+        final String message = getString(R.string.device_found) + deviceName;
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void startDeviceListActivity(ArrayList<BluetoothDevice> deviceList) {
+        Intent intent = new Intent(this, DeviceListActivity.class);
+
+        intent.putParcelableArrayListExtra("device.list", deviceList);
+        startActivity(intent);
     }
 
     @Override
@@ -95,15 +154,8 @@ public class PairActivity extends AppCompatActivity implements PairContract.IPai
         switch (requestCode) {
             case MULTIPLE_PERMISSIONS: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permissions granted.
-                    // enableComponent(); // Now you call here what ever you want :)
-                    Toast.makeText(this, "permisos ok", Toast.LENGTH_LONG).show();
+                    presenter.tryRegisterReceiver();
                 } else {
-                    String perStr = "";
-                    for (String per : permissions) {
-                        perStr += "\n" + per;
-                    }
-                    // permissions list of don't granted permission
                     Toast.makeText(this, "ATENCION: La aplicacion no funcionara " +
                             "correctamente debido a la falta de Permisos", Toast.LENGTH_LONG).show();
                 }
@@ -111,5 +163,20 @@ public class PairActivity extends AppCompatActivity implements PairContract.IPai
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    public void onPause()
+    {
+        presenter.onViewPaused();
+        unregisterReceiver(presenter.getReceiver());
+
+        super.onPause();
+    }
+
+    public void onDestroy() {
+        unregisterReceiver(presenter.getReceiver());
+
+        super.onDestroy();
     }
 }

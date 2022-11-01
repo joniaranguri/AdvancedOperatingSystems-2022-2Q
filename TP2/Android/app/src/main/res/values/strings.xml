@@ -9,11 +9,25 @@
     <string name="option_sensors_title">Visualizar sensores</string>
     <string name="option_sensors_subtitle">Interactua con los sensores del celular para realizar alguna acción en el Arduino SABI</string>
 
+    <!-- PAIR ACTIVITY -->
+    <string name="activate_bluetooth">Activar Bluetooth</string>
+    <string name="bluetooth_not_activated">Bluetooth desactivado</string>
+    <string name="bluetooth_unsupported">El dispositivo no soporta Bluetooth</string>
+    <string name="search_devices">Buscar dispositivos</string>
+    <string name="searching_devices">Buscando dispositivos…</string>
+    <string name="device_found">Dispositivo encontrado: </string>
+    <string name="cancel">Cancelar</string>
+
+
     <!-- BLUETOOTH ACTIVITY -->
     <string name="command_bt_hc_05">Comando BT HC-05</string>
     <string name="send_command_hint">Enviar Comando</string>
 
     <!-- SENSORS ACTIVITY -->
     <string name="sensor_accelerometer_title">Acelerómetro</string>
+
+    <!-- DEVICES LIST -->
+    <string name="text_list_devices">Lista de dispositivos</string>
+    <string name="text_list_pair">Emparejar</string>
 
 </resources>
