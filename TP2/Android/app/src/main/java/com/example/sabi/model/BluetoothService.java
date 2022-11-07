@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.sabi.R;
 import com.example.sabi.contract.ArduinoBTListener;
 
 import java.io.IOException;
@@ -16,12 +17,11 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 public class BluetoothService {
-    private static final String TAG = "BluetoothConnectionServ";
-    private static final String appName = "MYAPP";
+    private final String TAG = this.getClass().toString();
+    private static String appName;
     private static final UUID UUID_SABI = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
     private final BluetoothAdapter mBluetoothAdapter;
     private final ArduinoBTListener readBTListener;
-    Context mContext;
     private AcceptThread mInsecureAcceptThread;
     private ConnectThread mConnectThread;
     private BluetoothDevice mmDevice;
@@ -29,9 +29,9 @@ public class BluetoothService {
     private ConnectedThread mConnectedThread;
 
     public BluetoothService(Context context, ArduinoBTListener readBTListener) {
-        this.mContext = context;
         this.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         this.readBTListener = readBTListener;
+        appName = context.getString(R.string.app_name);
         start();
     }
 
@@ -42,7 +42,6 @@ public class BluetoothService {
      * (or until cancelled).
      */
     private class AcceptThread extends Thread {
-
         // The local server socket
         private final BluetoothServerSocket mmServerSocket;
 
@@ -71,8 +70,6 @@ public class BluetoothService {
             } catch (IOException e) {
                 Log.e(TAG, "AcceptThread: IOException: " + e.getMessage());
             }
-
-            //talk about this is in the 3rd
             if (socket != null) {
                 connected(socket);
             }
@@ -169,17 +166,15 @@ public class BluetoothService {
      * receiving incoming data through input/output streams respectively.
      **/
     private class ConnectedThread extends Thread {
-        private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
 
         public ConnectedThread(BluetoothSocket socket) {
-            mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
             try {
-                tmpIn = mmSocket.getInputStream();
-                tmpOut = mmSocket.getOutputStream();
+                tmpIn = socket.getInputStream();
+                tmpOut = socket.getOutputStream();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -199,7 +194,6 @@ public class BluetoothService {
                     bytes = mmInStream.read(buffer);
                     incomingMessage = new String(buffer, 0, bytes);
                     readBTListener.onArduinoMessage(incomingMessage);
-                    Log.d(TAG, "InputStream: " + incomingMessage);
                 } catch (IOException e) {
                     Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage());
                     break;
@@ -231,7 +225,6 @@ public class BluetoothService {
     public void write(byte[] out) {
         mConnectedThread.write(out);
     }
-
 }
 
 
