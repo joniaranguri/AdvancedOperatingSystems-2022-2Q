@@ -21,6 +21,7 @@
 // Para probar con Serial.read, cambiar el rango horario entre dos valores < 10
 #define DATE_TIME_HOUR_MIN 9
 #define DATE_TIME_HOUR_MAX 21
+#define BLUETOOTH_WATER_LEVEL_COMMAND 1
 
 // ------------------------------------------------
 // TEMPORIZADORES
@@ -412,10 +413,8 @@ void handle_water_level_changed_on() {
 
 // Actúo sobre el embebido en base al comando recibido por Bluetooth
 void handle_bt_command_received() {
-    if (bt_command == "1") {
-        digitalWrite(LED_BUILTIN, HIGH);
-    } else {
-        digitalWrite(LED_BUILTIN, LOW);
+    if (bt_command == String(BLUETOOTH_WATER_LEVEL_COMMAND)) {
+        send_water_level_through_bluetooth();
     }
 }
 
