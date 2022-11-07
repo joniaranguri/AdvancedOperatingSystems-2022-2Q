@@ -1,5 +1,6 @@
 package com.example.sabi.contract;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 
 public interface BluetoothContract {
@@ -11,6 +12,8 @@ public interface BluetoothContract {
          * @param command the command to send
          */
         void sendCommand(String command);
+
+        void initBluetoothService(BluetoothDevice device);
     }
 
     interface IBluetoothView extends BaseContract.IBaseView {
@@ -29,11 +32,11 @@ public interface BluetoothContract {
         boolean isAttached();
 
         /**
-         * Shows the current command in the UI
+         * Show the message obtained from the Arduino device
          *
-         * @param command the command to be shown
+         * @param message the message to be shown
          */
-        void showCommand(String command);
+        void showMessage(String message);
     }
 
     interface IBluetoothPresenter extends BaseContract.IBasePresenter {
@@ -51,6 +54,22 @@ public interface BluetoothContract {
          * @param command the command to send
          */
         void sendCommand(String command);
+
+        /**
+         * Show the message obtained from the Arduino device
+         *
+         * @param message the message to be shown
+         */
+        void showMessage(String message);
+
+        void initBluetoothService(BluetoothDevice device);
+
+        /**
+         * Gets View context.
+         *
+         * @return view context.
+         */
+        Context getViewContext();
     }
 
 }

@@ -20,8 +20,14 @@
 
 
     <!-- BLUETOOTH ACTIVITY -->
-    <string name="command_bt_hc_05">Comando BT HC-05</string>
-    <string name="send_command_hint">Enviar Comando</string>
+    <string name="tank_status_label">Estado del tanque</string>
+    <string name="send_command_on">Enviar Comando LED ON</string>
+    <string name="send_command_off">Enviar Comando LED OFF</string>
+    <string name="water_level_1">El tanque esta vacio</string>
+    <string name="water_level_2">El tanque tiene un 25% de su capacidad</string>
+    <string name="water_level_3">El tanque tiene un 50% de su capacidad</string>
+    <string name="water_level_4">El tanque tiene un 75% de su capacidad</string>
+    <string name="water_level_5">El tanque esta LLENO</string>
 
     <!-- SENSORS ACTIVITY -->
     <string name="sensor_accelerometer_title">Acelerómetro</string>
