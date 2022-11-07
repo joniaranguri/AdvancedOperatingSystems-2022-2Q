@@ -3,6 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.sabi">
 
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -22,13 +30,17 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".view.PairActivity"
+            android:exported="false"/>
+        <activity
             android:name=".view.BluetoothActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false"/>
         <activity
             android:name=".view.SensorActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false"/>
+        <activity
+            android:name=".view.DeviceListActivity"
+            android:exported="false"/>
     </application>
 
 </manifest>
