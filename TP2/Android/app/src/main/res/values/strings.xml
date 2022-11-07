@@ -21,8 +21,7 @@
 
     <!-- BLUETOOTH ACTIVITY -->
     <string name="tank_status_label">Estado del tanque</string>
-    <string name="send_command_on">Enviar Comando LED ON</string>
-    <string name="send_command_off">Enviar Comando LED OFF</string>
+    <string name="send_command_water_level">Enviar comando: pedir estado del tanque</string>
     <string name="water_level_1">El tanque esta vacio</string>
     <string name="water_level_2">El tanque tiene un 25% de su capacidad</string>
     <string name="water_level_3">El tanque tiene un 50% de su capacidad</string>
