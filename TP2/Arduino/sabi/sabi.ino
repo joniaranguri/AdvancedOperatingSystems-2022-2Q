@@ -277,7 +277,6 @@ void update_current_time_range_check() {
         String hour = Serial.readString();
         hour.trim();
         /*current_date = read_rtc();*/current_hour = hour[0] - '0';
-        Serial.println(current_hour);
     }
     if (/*current_date.hour*/current_hour >= DATE_TIME_HOUR_MIN && /*current_date.hour*/current_hour <= DATE_TIME_HOUR_MAX) {
         current_time_range_check = true;
