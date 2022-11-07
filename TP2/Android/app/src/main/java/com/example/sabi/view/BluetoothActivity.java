@@ -1,14 +1,13 @@
 package com.example.sabi.view;
 
-import static com.example.sabi.commons.Constants.COMMAND_LED_OFF;
-import static com.example.sabi.commons.Constants.COMMAND_LED_ON;
+import static com.example.sabi.commons.Constants.COMMAND_ASK_WATER_LEVEL;
 import static com.example.sabi.view.DeviceListActivity.BLUETOOTH_DEVICE_KEY;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Bundle;
-import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -28,12 +27,9 @@ public class BluetoothActivity extends AppCompatActivity implements BluetoothCon
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth);
-        Button sendCommandOnButton = findViewById(R.id.bluetooth_led_on_button);
-        Button sendCommandOffButton = findViewById(R.id.bluetooth_led_off_button);
         tankStatusEditText = findViewById(R.id.stateTank_textview);
         presenter = new BluetoothPresenter(this);
-        sendCommandOnButton.setOnClickListener(view -> presenter.sendCommand(COMMAND_LED_ON));
-        sendCommandOffButton.setOnClickListener(view -> presenter.sendCommand(COMMAND_LED_OFF));
+        findViewById(R.id.bluetooth_led_off_button).setOnClickListener(view -> presenter.sendCommand(COMMAND_ASK_WATER_LEVEL));
         final BluetoothDevice device = getIntent().getExtras().getParcelable(BLUETOOTH_DEVICE_KEY);
         presenter.initBluetoothService(device);
     }
@@ -50,6 +46,9 @@ public class BluetoothActivity extends AppCompatActivity implements BluetoothCon
 
     @Override
     public void showMessage(String message) {
-        runOnUiThread(() -> tankStatusEditText.setText(message));
+        runOnUiThread(() -> {
+            Toast.makeText(getViewContext(), message, Toast.LENGTH_SHORT).show();
+            tankStatusEditText.setText(message);
+        });
     }
 }
