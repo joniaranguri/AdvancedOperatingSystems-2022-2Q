@@ -27,7 +27,7 @@ import com.example.sabi.presenter.PairPresenter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PairActivity extends AppCompatActivity implements PairContract.IPairView{
+public class PairActivity extends AppCompatActivity implements PairContract.IPairView {
 
     private final int permissionsRequestCode = 1000;
 
@@ -36,6 +36,7 @@ public class PairActivity extends AppCompatActivity implements PairContract.IPai
     private Button activateBtBtn;
     private Button searchBtn;
     private ProgressDialog progressDialog;
+    private boolean receiverRegistered;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +107,7 @@ public class PairActivity extends AppCompatActivity implements PairContract.IPai
     @Override
     public void registerReceiverForPair(BroadcastReceiver receiver, IntentFilter filter) {
         registerReceiver(receiver, filter);
+        receiverRegistered = true;
     }
 
     @Override
@@ -166,17 +168,12 @@ public class PairActivity extends AppCompatActivity implements PairContract.IPai
     }
 
     @Override
-    public void onPause()
-    {
+    public void onPause() {
         presenter.onViewPaused();
-        unregisterReceiver(presenter.getReceiver());
-
+        if (receiverRegistered) {
+            unregisterReceiver(presenter.getReceiver());
+            receiverRegistered = false;
+        }
         super.onPause();
-    }
-
-    public void onDestroy() {
-        unregisterReceiver(presenter.getReceiver());
-
-        super.onDestroy();
     }
 }
