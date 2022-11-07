@@ -38,7 +38,6 @@ public class PairPresenter implements PairContract.IPairPresenter {
     @Override
     public void onActivateBtButtonClick() {
         Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-
         view.startForResult(intent);
     }
 
@@ -68,7 +67,7 @@ public class PairPresenter implements PairContract.IPairPresenter {
             return true;
         }
 
-        List <String> listPermissionsNeeded = model.getPermissionsNeeded(view.getViewContext());
+        List<String> listPermissionsNeeded = model.getPermissionsNeeded(view.getViewContext());
 
         if (!listPermissionsNeeded.isEmpty()) {
             view.requestPermissions(listPermissionsNeeded);
@@ -97,26 +96,26 @@ public class PairPresenter implements PairContract.IPairPresenter {
     }
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        private boolean isDiscoveryStarted = false;
+
         @SuppressLint("MissingPermission")
         public void onReceive(Context context, Intent intent) {
 
             String action = intent.getAction();
+            final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
             if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-
                 onBluetoothStateToggle(state == BluetoothAdapter.STATE_ON);
             } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
                 view.showProgressDialog();
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                isDiscoveryStarted = true;
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action) && isDiscoveryStarted) {
                 view.dismissProgressDialog();
                 view.startDeviceListActivity(deviceList);
                 deviceList.clear();
-            }
-            else if (BluetoothDevice.ACTION_FOUND.equals(action))
-            {
-                BluetoothDevice device = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
+                isDiscoveryStarted = false;
+            } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 deviceList.add(device);
                 view.showDeviceFoundToast(device.getName());
             }
