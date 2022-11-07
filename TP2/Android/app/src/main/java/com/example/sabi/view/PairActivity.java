@@ -3,6 +3,7 @@ package com.example.sabi.view;
 import static com.example.sabi.presenter.PairPresenter.MULTIPLE_PERMISSIONS;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -29,7 +30,7 @@ import java.util.List;
 
 public class PairActivity extends AppCompatActivity implements PairContract.IPairView {
 
-    private final int permissionsRequestCode = 1000;
+    private final int bluetoothOnRequestCode = 1000;
 
     private PairContract.IPairPresenter presenter;
     private TextView btStateTv;
@@ -92,7 +93,15 @@ public class PairActivity extends AppCompatActivity implements PairContract.IPai
 
     @Override
     public void startForResult(Intent intent) {
-        startActivityForResult(intent, permissionsRequestCode);
+        startActivityForResult(intent, bluetoothOnRequestCode);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == bluetoothOnRequestCode && resultCode == RESULT_OK) {
+            updateViewsForBluetoothOn();
+        }
     }
 
     @Override
