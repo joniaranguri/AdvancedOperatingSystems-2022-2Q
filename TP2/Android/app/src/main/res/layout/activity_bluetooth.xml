@@ -8,12 +8,22 @@
     android:padding="20dp"
     tools:context=".view.BluetoothActivity">
 
-    <EditText
-        android:id="@+id/editText"
+    <TextView
+        android:id="@+id/stateTank_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:text="@string/tank_status_label"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/stateTank_textview"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/stateTank_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/option_background_round"
-        android:hint="@string/command_bt_hc_05"
         android:padding="20dp"
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -22,19 +32,19 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/bluetooth_activity_button"
+        android:id="@+id/bluetooth_led_off_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:background="@drawable/button_background_round"
         android:padding="20dp"
-        android:text="@string/send_command_hint"
+        android:text="@string/send_command_water_level"
         android:textAlignment="center"
         android:textAllCaps="false"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/editText"
-        app:layout_constraintStart_toStartOf="@+id/editText"
-        app:layout_constraintTop_toBottomOf="@+id/editText"
+        app:layout_constraintEnd_toEndOf="@+id/stateTank_textview"
+        app:layout_constraintStart_toStartOf="@+id/stateTank_textview"
+        app:layout_constraintTop_toBottomOf="@+id/stateTank_textview"
         app:layout_constraintVertical_bias="1.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
