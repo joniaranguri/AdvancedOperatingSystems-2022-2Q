@@ -274,7 +274,9 @@ bool changed_time_range() {
 // Según el horario, actualiza el booleano que indica si se está dentro el rango horario donde se puede encender la bomba.
 void update_current_time_range_check() {
     if(Serial.available()){
-        /*current_date = read_rtc();*/current_hour = Serial.read() - '0';
+        String hour = Serial.readString();
+        hour.trim();
+        /*current_date = read_rtc();*/current_hour = hour[0] - '0';
     }
     if (/*current_date.hour*/current_hour >= DATE_TIME_HOUR_MIN && /*current_date.hour*/current_hour <= DATE_TIME_HOUR_MAX) {
         current_time_range_check = true;
@@ -407,6 +409,8 @@ void handle_water_level_changed_on() {
     send_water_level_through_bluetooth();
     if(current_tank_state == TANK_FULL) {
         update_relay(false);
+    } else {
+        update_relay(true);
     }
 }
 
