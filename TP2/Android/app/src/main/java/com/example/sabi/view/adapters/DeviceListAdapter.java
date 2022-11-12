@@ -10,6 +10,8 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.core.content.res.ResourcesCompat;
+
 import com.example.sabi.R;
 
 import java.util.List;
@@ -61,6 +63,7 @@ public class DeviceListAdapter extends BaseAdapter{
 			holder.nameTv		= (TextView) convertView.findViewById(R.id.tv_name);
 			holder.addressTv 	= (TextView) convertView.findViewById(R.id.tv_address);
 			holder.pairBtn		= (Button) convertView.findViewById(R.id.btn_pair);
+			holder.connectBtn	= (Button) convertView.findViewById(R.id.btn_connect);
 			
 			convertView.setTag(holder);
 		} else {
@@ -70,13 +73,31 @@ public class DeviceListAdapter extends BaseAdapter{
 		BluetoothDevice device	= mData.get(position);
 		
 		holder.nameTv.setText(device.getName());
+
 		holder.addressTv.setText(device.getAddress());
+
 		holder.pairBtn.setText((device.getBondState() == BluetoothDevice.BOND_BONDED) ? "Unpair" : "Pair");
+		holder.pairBtn.setEnabled(true);
 		holder.pairBtn.setOnClickListener(new View.OnClickListener() {			
 			@Override
 			public void onClick(View v) {
 				if (mListener != null) {
 					mListener.onPairButtonClick(position);
+				}
+			}
+		});
+
+		holder.connectBtn.setEnabled((device.getBondState() == BluetoothDevice.BOND_BONDED));
+		holder.connectBtn.setTextColor(
+				(device.getBondState() == BluetoothDevice.BOND_BONDED) ?
+						ResourcesCompat.getColor(convertView.getResources(), R.color.green, convertView.getContext().getTheme()) :
+						ResourcesCompat.getColor(convertView.getResources(), R.color.red, convertView.getContext().getTheme())
+		);
+		holder.connectBtn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (mListener != null) {
+					mListener.onConnectButtonClick(position);
 				}
 			}
 		});
@@ -87,10 +108,12 @@ public class DeviceListAdapter extends BaseAdapter{
 	static class ViewHolder {
 		TextView nameTv;
 		TextView addressTv;
-		TextView pairBtn;
+		Button pairBtn;
+		Button connectBtn;
 	}
 	
 	public interface OnPairButtonClickListener {
 		void onPairButtonClick(int position);
+		void onConnectButtonClick(int position);
 	}
 }
