@@ -117,6 +117,11 @@ public class DeviceListActivity extends Activity
 
             }
         }
+
+        @Override
+        public void onConnectButtonClick(int position) {
+            startBTActivity();
+        }
     };
 
     //Handler que captura los brodacast que emite el SO al ocurrir los eventos del bluethoot
@@ -138,13 +143,7 @@ public class DeviceListActivity extends Activity
                 {
                     //Si se detecto que se puedo emparejar el bluethoot
                     showToast("Emparejado");
-                    BluetoothDevice device = (BluetoothDevice) mAdapter.getItem(posicionListBluethoot);
-
-                    //se inicia el Activity de comunicacion con el bluetooth, para transferir los datos.
-                    //Para eso se le envia como parametro el device del bluethoot Arduino
-                    Intent i = new Intent(DeviceListActivity.this, BluetoothActivity.class);
-                    i.putExtra(BLUETOOTH_DEVICE_KEY, device);
-                    startActivity(i);
+                    startBTActivity();
 
                 }  //si se detrecto un desaemparejamiento
                     else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED) {
@@ -154,6 +153,16 @@ public class DeviceListActivity extends Activity
             }
         }
     };
+
+    private void startBTActivity() {
+        BluetoothDevice device = (BluetoothDevice) mAdapter.getItem(posicionListBluethoot);
+
+        //se inicia el Activity de comunicacion con el bluetooth, para transferir los datos.
+        //Para eso se le envia como parametro el device del bluethoot Arduino
+        Intent i = new Intent(DeviceListActivity.this, BluetoothActivity.class);
+        i.putExtra(BLUETOOTH_DEVICE_KEY, device);
+        startActivity(i);
+    }
 }
 
 
