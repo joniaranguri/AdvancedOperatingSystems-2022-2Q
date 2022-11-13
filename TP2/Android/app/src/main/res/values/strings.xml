@@ -34,5 +34,6 @@
     <!-- DEVICES LIST -->
     <string name="text_list_devices">Lista de dispositivos</string>
     <string name="text_list_pair">Emparejar</string>
+    <string name="text_list_connect">Connect</string>
 
 </resources>
