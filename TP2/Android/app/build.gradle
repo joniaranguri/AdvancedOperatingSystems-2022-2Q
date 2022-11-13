@@ -11,7 +11,8 @@ android {
         targetSdk 32
         versionCode 1
         versionName "1.0"
-
+        buildConfigField "String", "HC05_MAC_ADRESS", "\"$hc05MacAdress\""
+        buildConfigField "String", "HC05_PASSWORD", "\"$hc05Password\""
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
