@@ -26,6 +26,7 @@ public class BluetoothPresenter implements BluetoothContract.IBluetoothPresenter
     public void sendCommand(String command) {
         if (isViewAttached()) {
             model.sendCommand(command);
+            view.showMessage(getViewContext().getString(R.string.sending_command));
         }
     }
 
