@@ -7,7 +7,9 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Build;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
 import com.example.sabi.contract.PairContract;
@@ -24,6 +26,11 @@ public class PairModel implements PairContract.IPairModel {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.READ_EXTERNAL_STORAGE};
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    private final String[] android12Permissions = new String[]{
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.BLUETOOTH_SCAN,};
 
     private final BluetoothAdapter bluetoothAdapter;
 
@@ -59,6 +66,14 @@ public class PairModel implements PairContract.IPairModel {
             result = ContextCompat.checkSelfPermission(context, p);
             if (result != PackageManager.PERMISSION_GRANTED) {
                 listPermissionsNeeded.add(p);
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            for (String p : android12Permissions) {
+                result = ContextCompat.checkSelfPermission(context, p);
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    listPermissionsNeeded.add(p);
+                }
             }
         }
         return listPermissionsNeeded;
