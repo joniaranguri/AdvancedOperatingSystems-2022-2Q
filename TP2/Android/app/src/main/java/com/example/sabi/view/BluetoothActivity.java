@@ -51,4 +51,10 @@ public class BluetoothActivity extends AppCompatActivity implements BluetoothCon
             tankStatusEditText.setText(message);
         });
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        presenter.unpairDevice();
+    }
 }

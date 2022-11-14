@@ -62,6 +62,11 @@ public class BluetoothPresenter implements BluetoothContract.IBluetoothPresenter
     }
 
     @Override
+    public void unpairDevice() {
+        this.model.unpairDevice();
+    }
+
+    @Override
     public boolean isViewAttached() {
         return view.isAttached();
     }

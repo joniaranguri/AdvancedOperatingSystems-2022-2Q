@@ -12,18 +12,19 @@ import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.sabi.BuildConfig;
 import com.example.sabi.R;
 import com.example.sabi.view.adapters.DeviceListAdapter;
 
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /*********************************************************************************************************
  * Activity que muestra el listado de los dispositivos bluethoot encontrados
  **********************************************************************************************************/
 
-public class DeviceListActivity extends Activity
-{
+public class DeviceListActivity extends Activity {
     public static final String BLUETOOTH_DEVICE_KEY = "bluetooth_device_key";
     private ListView mListView;
     private DeviceListAdapter mAdapter;
@@ -31,8 +32,7 @@ public class DeviceListActivity extends Activity
     private int posicionListBluethoot;
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_paired_devices);
@@ -58,9 +58,12 @@ public class DeviceListActivity extends Activity
 
         filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED); //Cuando se empareja o desempareja el bluethoot
 
-        //se define (registra) el handler que captura los broadcast anterirmente mencionados.
+        //se define (registra) el handler que captura los broadcast anteriormente mencionados.
         registerReceiver(mPairReceiver, filter);
 
+        //broadcast receiver to handle pin action
+        IntentFilter pairFilter = new IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST);
+        getApplicationContext().registerReceiver(mPairingRequestReceiver, pairFilter);
     }
 
     @Override
@@ -99,28 +102,44 @@ public class DeviceListActivity extends Activity
         @SuppressLint("MissingPermission")
         @Override
         public void onPairButtonClick(int position) {
-           //Obtengo los datos del dispostivo seleccionado del listview por el usuario
+            //Obtengo los datos del dispostivo seleccionado del listview por el usuario
             BluetoothDevice device = mDeviceList.get(position);
 
             //Se checkea si el sipositivo ya esta emparejado
-            if (device.getBondState() == BluetoothDevice.BOND_BONDED)
-            {
+            if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
                 //Si esta emparejado,quiere decir que se selecciono desemparjar y entonces se le desempareja
                 unpairDevice(device);
-            }
-            else
-            {
-                //Si no esta emparejado,quiere decir que se selecciono emparjar y entonces se le empareja
+            } else {
+                //Si no esta emparejado,quiere decir que se selecciono conectar y entonces se lo conecta
                 showToast("Emparejando");
                 posicionListBluethoot = position;
                 pairDevice(device);
-
             }
         }
 
         @Override
         public void onConnectButtonClick(int position) {
+            BluetoothDevice device = mDeviceList.get(position);
+            posicionListBluethoot = position;
+            pairDevice(device);
             startBTActivity();
+        }
+    };
+
+    private final BroadcastReceiver mPairingRequestReceiver = new BroadcastReceiver() {
+        @SuppressLint("MissingPermission")
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(BluetoothDevice.ACTION_PAIRING_REQUEST)) {
+                try {
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    if (!BuildConfig.HC05_MAC_ADRESS.equals(device.getAddress())) return;
+                    device.setPin(BuildConfig.HC05_PASSWORD.getBytes(StandardCharsets.UTF_8));
+                    abortBroadcast();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     };
 
@@ -132,21 +151,19 @@ public class DeviceListActivity extends Activity
             String action = intent.getAction();
 
             //si el SO detecto un emparejamiento o desemparjamiento de bulethoot
-            if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action))
-            {
+            if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
                 //Obtengo los parametro, aplicando un Bundle, que me indica el estado del Bluethoot
                 final int state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);
                 final int prevState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR);
 
                 //se analiza si se puedo emparejar o no
-                if (state == BluetoothDevice.BOND_BONDED && prevState == BluetoothDevice.BOND_BONDING)
-                {
+                if (state == BluetoothDevice.BOND_BONDED && prevState == BluetoothDevice.BOND_BONDING) {
                     //Si se detecto que se puedo emparejar el bluethoot
                     showToast("Emparejado");
                     startBTActivity();
 
                 }  //si se detrecto un desaemparejamiento
-                    else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED) {
+                else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED) {
                     showToast("No emparejado");
                 }
                 mAdapter.notifyDataSetChanged();
@@ -162,6 +179,7 @@ public class DeviceListActivity extends Activity
         Intent i = new Intent(DeviceListActivity.this, BluetoothActivity.class);
         i.putExtra(BLUETOOTH_DEVICE_KEY, device);
         startActivity(i);
+        finish();
     }
 }
 

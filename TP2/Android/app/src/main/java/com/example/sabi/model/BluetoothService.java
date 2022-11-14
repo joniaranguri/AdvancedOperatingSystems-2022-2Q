@@ -11,6 +11,7 @@ import com.example.sabi.model.threads.AcceptThread;
 import com.example.sabi.model.threads.ConnectThread;
 import com.example.sabi.model.threads.ConnectedThread;
 
+import java.lang.reflect.Method;
 import java.util.UUID;
 
 public class BluetoothService {
@@ -70,6 +71,17 @@ public class BluetoothService {
      * @see ConnectedThread#write(byte[])
      */
     public void write(byte[] out) {
-        mConnectedThread.write(out);
+        if (mConnectedThread != null)
+            mConnectedThread.write(out);
+    }
+
+    public void unpairDevice() {
+        try {
+            Method method = mmDevice.getClass().getMethod("removeBond", (Class[]) null);
+            method.invoke(mmDevice, (Object[]) null);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
