@@ -14,6 +14,8 @@ public interface BluetoothContract {
         void sendCommand(String command);
 
         void initBluetoothService(BluetoothDevice device);
+
+        void unpairDevice();
     }
 
     interface IBluetoothView extends BaseContract.IBaseView {
@@ -70,6 +72,8 @@ public interface BluetoothContract {
          * @return view context.
          */
         Context getViewContext();
+
+        void unpairDevice();
     }
 
 }

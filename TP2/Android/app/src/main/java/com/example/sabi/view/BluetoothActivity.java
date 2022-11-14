@@ -47,8 +47,13 @@ public class BluetoothActivity extends AppCompatActivity implements BluetoothCon
     @Override
     public void showMessage(String message) {
         runOnUiThread(() -> {
-            Toast.makeText(getViewContext(), message, Toast.LENGTH_SHORT).show();
             tankStatusEditText.setText(message);
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        presenter.unpairDevice();
     }
 }

@@ -28,4 +28,9 @@ public class BluetoothModel implements BluetoothContract.IBluetoothModel {
         this.bluetoothService = new BluetoothService(presenter.getViewContext(), presenter::showMessage);
         this.bluetoothService.startClient(device, UUID_SABI);
     }
+
+    @Override
+    public void unpairDevice() {
+        this.bluetoothService.unpairDevice();
+    }
 }
